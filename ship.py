@@ -27,7 +27,7 @@ class Ship:
         #draw the ship at its current location
         self.screen.blit(self.image, self.rect)
 
-    def moveShip(self):
+    def update(self):
         if self.moving_right:
             if self.rect.x < (self.settings.screen_width - 50):
                 self.rect.x += self.settings.ship_speed
