@@ -63,13 +63,13 @@ class AlienInvasion:
 
     def _update_screen(self):
         #update images on the screen and flip to new screen
+        #draw the background
         self.screen.fill(self.settings.bg_color)
-
+        #draw bullets
         for bullet in self.bullets.sprites():
             bullet.blitme()
-        print(len(self.bullets))
+        #draw the ship
         self.ship.blitme()
-
         pygame.display.flip()
 
     def _fire_bullet(self):
