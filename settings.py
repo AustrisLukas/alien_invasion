@@ -12,4 +12,6 @@ class Settings:
         self.bullet_color_red = [150, 0, 0]
         self.bullet_color_grey = [50,50,50]
         self.bullets_allowed = 10
+
+        self.starting_fleet_rows = 5
         

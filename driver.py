@@ -21,7 +21,7 @@ class AlienInvasion:
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
 
-        self._create_alien_fleet()
+        self._create_alien_fleet(self.settings.starting_fleet_rows)
 
 
     def run_game(self):
@@ -95,19 +95,37 @@ class AlienInvasion:
                 self.bullets.remove(bullet)
 
 
-    def _create_alien_fleet(self):
+    def _create_alien_fleet(self, rows):
 
         alien = Alien(self)
+        starting_x = alien.rect.width
+        starting_y = alien.rect.height
+
         alien_width = alien.rect.width
+        
+        for i in range(rows):
 
-        current_x = alien_width
-        while (current_x < self.settings.screen_width - (2 * alien_width)):
+            j = starting_x
+            while j < self.settings.screen_width - (2 * alien_width):
 
-            alien = Alien(self)
-            alien.rect.x = current_x
-            self.aliens.add(alien)
-            current_x += 2 * alien_width
+                #create row indentation for odd number row
+                if j == starting_x and i % 2 != 0:
+                    j *= 2
+                    self.create_alien(j, (starting_y * i))
+                #no indentation
+                else: 
+                    self.create_alien(j, (starting_y * i))
+                
+                #increment the j iterator 
+                j = j + (2 * alien_width)
 
+
+    def create_alien(self, alien_x, alien_y):
+
+        self.new_alien = Alien(self)
+        self.new_alien.rect.x = alien_x
+        self.new_alien.rect.y = alien_y
+        self.aliens.add(self.new_alien)
 
 
 
