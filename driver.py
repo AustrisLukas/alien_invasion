@@ -30,11 +30,12 @@ class AlienInvasion:
             self._check_events()
             self.ship.update()
             self.bullets.update()
+            self._update_aliens()
+            self._update_bullets()
             self._remove_old_bullets()
             self._update_screen() 
             self.clock.tick(60)
 
-            
 
 
     def _check_events(self):
@@ -86,7 +87,11 @@ class AlienInvasion:
         else: 
             print('Gun overheated!')
 
-    
+    def _update_bullets(self):
+        #check if there are any colisions between two sprite groups.
+        #if yes, delete bullet and alien
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+
 
     def _remove_old_bullets(self):
         #removes bullets that have left the visible portion of the screen
@@ -128,9 +133,27 @@ class AlienInvasion:
         self.aliens.add(self.new_alien)
 
 
-
+    def _update_aliens(self):
+        self._check_fleet_edges()
+        self.aliens.update()
 
         
+    def _check_fleet_edges(self):
+
+        #iterate through aliens fleet and call check_edges on each alien. Direction change call if edge colision is detected
+        for alien in self.aliens.sprites():
+            if alien.check_edges():
+                self._change_fleet_direction()
+                break
+
+    def _change_fleet_direction(self):
+        #change fleet direction
+        self.settings.fleet_direction *= -1
+        #drow down alien fleet as direction changes
+        for alien in self.aliens.sprites():
+            alien.rect.y += self.settings.fleet_drop_speed
+        
+
 
 if __name__ == '__main__':
     ai = AlienInvasion()

@@ -14,4 +14,7 @@ class Settings:
         self.bullets_allowed = 10
 
         self.starting_fleet_rows = 5
+        self.fleet_direction = 1
+        self.fleet_drop_speed = 2
+
         
