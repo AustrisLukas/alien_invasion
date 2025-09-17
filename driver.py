@@ -98,21 +98,17 @@ class AlienInvasion:
         for bullet in self.bullets.copy():
             if bullet.rect.y < 0 or bullet.rect.y > self.settings.screen_height:
                 self.bullets.remove(bullet)
-
+                
 
     def _create_alien_fleet(self, rows):
-
         alien = Alien(self)
         starting_x = alien.rect.width
         starting_y = alien.rect.height
-
         alien_width = alien.rect.width
         
         for i in range(rows):
-
             j = starting_x
             while j < self.settings.screen_width - (2 * alien_width):
-
                 #create row indentation for odd number row
                 if j == starting_x and i % 2 != 0:
                     j *= 2
@@ -120,13 +116,10 @@ class AlienInvasion:
                 #no indentation
                 else: 
                     self.create_alien(j, (starting_y * i))
-                
                 #increment the j iterator 
                 j = j + (2 * alien_width)
 
-
     def create_alien(self, alien_x, alien_y):
-
         self.new_alien = Alien(self)
         self.new_alien.rect.x = alien_x
         self.new_alien.rect.y = alien_y
@@ -134,12 +127,14 @@ class AlienInvasion:
 
 
     def _update_aliens(self):
+        if not self.aliens:
+            self._advance_level()
+        #check fleet edges and change moving direction if needed
         self._check_fleet_edges()
         self.aliens.update()
 
         
     def _check_fleet_edges(self):
-
         #iterate through aliens fleet and call check_edges on each alien. Direction change call if edge colision is detected
         for alien in self.aliens.sprites():
             if alien.check_edges():
@@ -153,7 +148,12 @@ class AlienInvasion:
         for alien in self.aliens.sprites():
             alien.rect.y += self.settings.fleet_drop_speed
         
-
+    def _advance_level(self):
+        #advances level by increasing difficulty and respawnig alien fleet
+        self.bullets.empty()
+        self.settings.starting_fleet_rows += 1
+        self.settings.fleet_drop_speed += 1
+        self._create_alien_fleet(self.settings.starting_fleet_rows)
 
 if __name__ == '__main__':
     ai = AlienInvasion()
