@@ -5,6 +5,7 @@ from ship import Ship
 from settings import Settings
 from bullet import Bullet
 from alien import Alien
+from game_stats import GameStats
 
 class AlienInvasion:
 
@@ -20,8 +21,9 @@ class AlienInvasion:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
+        self.game_stats = GameStats(self)
 
-        self._create_alien_fleet(self.settings.starting_fleet_rows)
+        self._create_alien_fleet()
 
 
     def run_game(self):
@@ -31,11 +33,11 @@ class AlienInvasion:
             self.ship.update()
             self.bullets.update()
             self._update_aliens()
-            self._update_bullets()
+            self._check_bullet_alien_collisions()
+            self._check_alien_ship_collisions()
             self._remove_old_bullets()
             self._update_screen() 
             self.clock.tick(60)
-
 
 
     def _check_events(self):
@@ -87,26 +89,34 @@ class AlienInvasion:
         else: 
             print('Gun overheated!')
 
-    def _update_bullets(self):
+    def _check_bullet_alien_collisions(self):
         #check if there are any colisions between two sprite groups.
         #if yes, delete bullet and alien
         collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
 
+    def _check_alien_ship_collisions(self):
+        #check if any of the alien crafts collided with the ship
+        if pygame.sprite.spritecollideany(self.ship, self.aliens):
+            print("Collision with the ship !!")
+            self.aliens.empty()
+            self.bullets.empty()
+            self._create_alien_fleet()
+            
 
     def _remove_old_bullets(self):
         #removes bullets that have left the visible portion of the screen
         for bullet in self.bullets.copy():
             if bullet.rect.y < 0 or bullet.rect.y > self.settings.screen_height:
                 self.bullets.remove(bullet)
-                
 
-    def _create_alien_fleet(self, rows):
+
+    def _create_alien_fleet(self):
         alien = Alien(self)
         starting_x = alien.rect.width
         starting_y = alien.rect.height
         alien_width = alien.rect.width
         
-        for i in range(rows):
+        for i in range(self.game_stats.fleet_rows):
             j = starting_x
             while j < self.settings.screen_width - (2 * alien_width):
                 #create row indentation for odd number row
@@ -128,7 +138,9 @@ class AlienInvasion:
 
     def _update_aliens(self):
         if not self.aliens:
-            self._advance_level()
+            self.game_stats.advance_level()
+            self.bullets.empty() 
+            self._create_alien_fleet()
         #check fleet edges and change moving direction if needed
         self._check_fleet_edges()
         self.aliens.update()
@@ -141,19 +153,14 @@ class AlienInvasion:
                 self._change_fleet_direction()
                 break
 
+
     def _change_fleet_direction(self):
         #change fleet direction
         self.settings.fleet_direction *= -1
         #drow down alien fleet as direction changes
         for alien in self.aliens.sprites():
-            alien.rect.y += self.settings.fleet_drop_speed
+            alien.update_y(self.game_stats.fleet_drop_speed)
         
-    def _advance_level(self):
-        #advances level by increasing difficulty and respawnig alien fleet
-        self.bullets.empty()
-        self.settings.starting_fleet_rows += 1
-        self.settings.fleet_drop_speed += 1
-        self._create_alien_fleet(self.settings.starting_fleet_rows)
 
 if __name__ == '__main__':
     ai = AlienInvasion()

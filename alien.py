@@ -20,6 +20,9 @@ class Alien(Sprite):
     def update(self):
         self.rect.x += self.settings.fleet_direction        
 
+    def update_y(self, drop):
+        self.rect.y += drop
+        
     def check_edges(self):
         screen_rect = self.screen.get_rect()
         return (self.rect.right >= screen_rect.right) or (self.rect.left <= 0)
