@@ -24,8 +24,8 @@ class Bullet(Sprite):
 
 
     def blitme(self):
-
         pygame.draw.rect(self.screen, self.color, self.rect)
+
 
     def update(self):
 

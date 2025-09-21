@@ -39,6 +39,7 @@ class Ship:
             else:
                 self.rect.x = (self.settings.screen_width - 50)
 
-
+    def center_ship(self):
+        self.rect.midbottom = self.screen_rect.midbottom
 
 

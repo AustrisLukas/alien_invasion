@@ -6,6 +6,7 @@ from settings import Settings
 from bullet import Bullet
 from alien import Alien
 from game_stats import GameStats
+from time import sleep
 
 class AlienInvasion:
 
@@ -33,12 +34,12 @@ class AlienInvasion:
             self.ship.update()
             self.bullets.update()
             self._update_aliens()
-            self._check_bullet_alien_collisions()
-            self._check_alien_ship_collisions()
             self._remove_old_bullets()
             self._update_screen() 
+            self._check_bullet_alien_collisions()
+            self._check_alien_ship_collisions()
             self.clock.tick(60)
-
+            
 
     def _check_events(self):
     #respond to keypress and mouse events
@@ -80,6 +81,8 @@ class AlienInvasion:
         #draw the ship
         self.ship.blitme()
         self.aliens.draw(self.screen)
+        self.game_stats.draw_ammo(self.settings.bullets_allowed - len(self.bullets))
+        self.game_stats.draw_lives()
         pygame.display.flip()
 
     def _fire_bullet(self):
@@ -97,10 +100,16 @@ class AlienInvasion:
     def _check_alien_ship_collisions(self):
         #check if any of the alien crafts collided with the ship
         if pygame.sprite.spritecollideany(self.ship, self.aliens):
-            print("Collision with the ship !!")
-            self.aliens.empty()
-            self.bullets.empty()
-            self._create_alien_fleet()
+            self._handle_ship_or_bottom_hit()
+
+
+    def _handle_ship_or_bottom_hit(self):
+        self.game_stats.ships_left -= 1
+        self.aliens.empty()
+        self.bullets.empty()
+        self._create_alien_fleet()
+        self.ship.center_ship()
+        sleep(1)
             
 
     def _remove_old_bullets(self):
@@ -147,10 +156,14 @@ class AlienInvasion:
 
         
     def _check_fleet_edges(self):
-        #iterate through aliens fleet and call check_edges on each alien. Direction change call if edge colision is detected
+        #iterate through aliens fleet and check for edge or bottom collisions. Direction change call if edge colision is detected
         for alien in self.aliens.sprites():
             if alien.check_edges():
                 self._change_fleet_direction()
+                break
+            #check for collisions at the bottom
+            if alien.check_bottom():
+                self._handle_ship_or_bottom_hit()
                 break
 
 
