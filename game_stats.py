@@ -1,4 +1,5 @@
 import pygame
+import pygame.font
 
 class GameStats:
 
@@ -23,6 +24,7 @@ class GameStats:
         self.game_level = 1
 
     def advance_level(self):
+        self.game_level += 1
         self.fleet_drop_speed += 1
         self.fleet_rows += 1
 
@@ -43,5 +45,29 @@ class GameStats:
 
        
     def check_for_game_over(self):
-        return False
+        print(self.ships_left)
+        return self.ships_left < 1
         
+
+    def draw_game_level(self):
+
+        level_msg = f"LEVEL {self.game_level}"
+
+        self.width, self.height = 50, 25
+        self.text_color = (255, 255, 255)
+        self.font = pygame.font.SysFont(None, 20)
+
+        self.rect = pygame.Rect(0, 0, self.width, self.height)
+        screen_rect = self.screen.get_rect()
+        self.rect.center = screen_rect.center
+
+        self.msg_img = self.font.render(level_msg, True, self.text_color)
+        self.msg_img_rect = self.msg_img.get_rect()
+    
+        self.msg_img_rect.x = self.settings.screen_width - 70
+        self.msg_img_rect.y = 10
+
+        self.screen.blit(self.msg_img, self.msg_img_rect)
+
+
+

@@ -7,6 +7,7 @@ from bullet import Bullet
 from alien import Alien
 from game_stats import GameStats
 from time import sleep
+from button import Button
 
 class AlienInvasion:
 
@@ -23,21 +24,26 @@ class AlienInvasion:
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.game_stats = GameStats(self)
-
+        self.game_active = False
         self._create_alien_fleet()
+        self.start_button = Button(self,'Start Game')
 
 
     def run_game(self):
         #main game driver
         while True:
             self._check_events()
-            self.ship.update()
-            self.bullets.update()
-            self._update_aliens()
-            self._remove_old_bullets()
+
+            if self.game_active:
+                self.ship.update()
+                self.bullets.update()
+                self._update_aliens()
+                self._remove_old_bullets()
+                self._check_bullet_alien_collisions()
+                self._check_alien_ship_collisions()
+            
             self._update_screen() 
-            self._check_bullet_alien_collisions()
-            self._check_alien_ship_collisions()
+            
             self.clock.tick(60)
             
 
@@ -50,6 +56,9 @@ class AlienInvasion:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
+            elif event.type == pygame.MOUSEBUTTONUP:
+                mouse_pos = pygame.mouse.get_pos()
+                self._check_play_button(mouse_pos)
 
                 
     def _check_keydown_events(self,event):
@@ -62,6 +71,8 @@ class AlienInvasion:
             self.ship.moving_left = True  
         if event.key == pygame.K_SPACE:
             self._fire_bullet()
+        if event.key == pygame.K_RETURN:
+            self.game_active = True
 
     
     def _check_keyup_events(self, event):
@@ -72,18 +83,25 @@ class AlienInvasion:
             self.ship.moving_left = False
 
     def _update_screen(self):
-        #update images on the screen and flip to new screen
-        #draw the background
-        self.screen.fill(self.settings.bg_color)
-        #draw bullets
-        for bullet in self.bullets.sprites():
-            bullet.blitme()
-        #draw the ship
-        self.ship.blitme()
-        self.aliens.draw(self.screen)
-        self.game_stats.draw_ammo(self.settings.bullets_allowed - len(self.bullets))
-        self.game_stats.draw_lives()
-        pygame.display.flip()
+        if self.game_active:  
+            #update images on the screen and flip to new screen
+            #draw the background
+            self.screen.fill(self.settings.bg_color)
+            #draw bullets
+            self.game_stats.draw_game_level()    
+            for bullet in self.bullets.sprites():
+                bullet.blitme()
+            #draw the ship
+            self.ship.blitme()
+            self.aliens.draw(self.screen)
+            self.game_stats.draw_ammo(self.settings.bullets_allowed - len(self.bullets))
+            self.game_stats.draw_lives()
+            pygame.display.flip()
+        else:
+            self.screen.fill(self.settings.bg_color)
+            self.start_button.draw_button()
+            pygame.display.flip()
+
 
     def _fire_bullet(self):
         if len(self.bullets) < self.settings.bullets_allowed:
@@ -109,6 +127,8 @@ class AlienInvasion:
         self.bullets.empty()
         self._create_alien_fleet()
         self.ship.center_ship()
+
+        if self.game_stats.check_for_game_over(): self.game_active = False
         sleep(1)
             
 
@@ -174,6 +194,11 @@ class AlienInvasion:
         for alien in self.aliens.sprites():
             alien.update_y(self.game_stats.fleet_drop_speed)
         
+    def _check_play_button(self, mouse_pos):
+        #check if mouse button was clicked within the START button. If so, start game
+        if self.start_button.rect.collidepoint(mouse_pos):
+            self.game_stats.reset_stats()
+            self.game_active = True
 
 if __name__ == '__main__':
     ai = AlienInvasion()
