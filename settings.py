@@ -16,7 +16,7 @@ class Settings:
 
         self.starting_fleet_rows = 5
         self.fleet_direction = 1
-        self.fleet_drop_speed = 50
+        self.fleet_drop_speed = 5
 
         
 
